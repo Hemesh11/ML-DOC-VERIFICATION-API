@@ -7,6 +7,29 @@ import json
 from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
 
+apm_config = {
+    'SERVICE_NAME': os.environ.get('ES_SERVICE_NAME_BE'),
+    'SECRET_TOKEN': os.environ.get('ES_SECRET_TOKEN'),
+    'SERVER_URL': os.environ.get('ES_SERVER_URL'),
+    'ENVIRONMENT': 'prod'
+}
+try:
+    apm = make_apm_client(apm_config)
+    print("APM client started successfully.")
+    print(f"APM config: {apm_config}")
+except Exception as e:
+    print(f"Error initializing Elastic APM: {e}")
+    apm = None
+
+
+# Initialize FastAPI
+app = FastAPI(title="Document Verification System", version="1.0", description="Validate documents in regard of a specific service asked")
+
+if apm:
+    app.add_middleware(ElasticAPM, client=apm)
+    print("ElasticAPM middleware added.")
+else:
+    print("APM client was not initialized. ElasticAPM middleware not added.")
 # Import our validation API
 from api.document_validation_api import DocumentValidationAPI
 
