@@ -6,6 +6,8 @@ import logging
 import json
 from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
+from elasticapm.contrib.starlette import make_apm_client, ElasticAPM
+import elasticapm
 
 apm_config = {
     'SERVICE_NAME': os.environ.get('ES_SERVICE_NAME_BE'),
@@ -15,6 +17,7 @@ apm_config = {
 }
 try:
     apm = make_apm_client(apm_config)
+    elasticapm.instrument()
     print("APM client started successfully.")
     print(f"APM config: {apm_config}")
 except Exception as e:
