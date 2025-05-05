@@ -3,7 +3,8 @@ import time
 from datetime import datetime, timedelta
 import traceback
 from typing import Dict, Any, Optional, List, Tuple
-
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dateutil import parser
 import re
 import json
@@ -975,30 +976,34 @@ class DocumentValidationService:
                     "error_message": None
                 }
         
-        # Comprehensive director validation
-        for director_key, director_info in directors.items():
-            try:
-                # Specific validation for each director
-                director_validation = self._validate_single_director(
-                    director_key, 
-                    director_info, 
-                    rules
-                )
-                
-                # Store any rule validations from the director
-                if 'rule_validations' in director_validation:
-                    for rule_id, rule_result in director_validation['rule_validations'].items():
-                        rule_validations[rule_id] = rule_result
-                
-                validation_results[director_key] = director_validation
+        # Process directors in parallel
+        with ThreadPoolExecutor(max_workers=min(len(directors), 5)) as executor:
+            # Create futures for each director validation
+            future_to_director = {
+                executor.submit(self._validate_single_director, director_key, director_info, rules): director_key
+                for director_key, director_info in directors.items()
+            }
             
-            except Exception as e:
-                self.logger.error(f"Error processing director {director_key}: {str(e)}", exc_info=True)
-                validation_results[director_key] = {
-                    "error": str(e),
-                    "is_valid": False,
-                    "validation_errors": [str(e)]
-                }
+            # Collect results as they complete
+            for future in as_completed(future_to_director):
+                director_key = future_to_director[future]
+                try:
+                    director_validation = future.result()
+                    
+                    # Store any rule validations from the director
+                    if 'rule_validations' in director_validation:
+                        for rule_id, rule_result in director_validation['rule_validations'].items():
+                            rule_validations[rule_id] = rule_result
+                    
+                    validation_results[director_key] = director_validation
+                
+                except Exception as e:
+                    self.logger.error(f"Error processing director {director_key}: {str(e)}", exc_info=True)
+                    validation_results[director_key] = {
+                        "error": str(e),
+                        "is_valid": False,
+                        "validation_errors": [str(e)]
+                    }
         
         # Add global errors if any
         if global_errors:
@@ -1009,10 +1014,11 @@ class DocumentValidationService:
         
         return validation_results
 
+
     def _validate_single_director(
         self, 
         director_key: str, 
-        director_info: Dict, 
+        director_info: Dict[str, Any], 
         rules: List
     ) -> Dict:
         """
@@ -1037,34 +1043,8 @@ class DocumentValidationService:
         nationality = director_info.get('nationality', '').lower()
         documents = director_info.get('documents', {})
         
-        # Prepare full document validation with extraction results
-        full_documents = {}
-        for doc_type, doc_url in documents.items():
-            try:
-                # Attempt to extract document data
-                extracted_data = self.extraction_service.extract_document_data(
-                    doc_url, 
-                    self._get_document_type(doc_type)
-                )
-                
-                # Create full document entry
-                full_documents[doc_type] = {
-                    'url': doc_url,
-                    'is_valid': extracted_data is not None and not (
-                        isinstance(extracted_data, dict) and 
-                        extracted_data.get('extraction_status') == 'failed'
-                    ),
-                    'extracted_data': extracted_data or {},
-                    'document_type': self._get_document_type(doc_type)
-                }
-            except Exception as e:
-                self.logger.error(f"Document extraction error for {doc_type}: {str(e)}")
-                full_documents[doc_type] = {
-                    'url': doc_url,
-                    'is_valid': False,
-                    'error': str(e),
-                    'document_type': self._get_document_type(doc_type)
-                }
+        # Prepare full document validation with extraction results in parallel
+        full_documents = self._process_director_documents_parallel(documents)
         
         # Specific nationality-based rules mapping
         nationality_rules = {
@@ -1150,6 +1130,104 @@ class DocumentValidationService:
             'documents': full_documents,
             'rule_validations': rule_validations
         }
+    
+    def _process_director_documents_parallel(
+        self, 
+        documents: Dict[str, str]
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Process and validate a set of director documents in parallel
+        
+        Args:
+            documents (dict): Document URLs
+        
+        Returns:
+            dict: Processed document details
+        """
+        processed_docs = {}
+        
+        # Skip if no documents
+        if not documents:
+            return processed_docs
+        
+        # Create futures for parallel execution
+        futures = {}
+        
+        # Use ThreadPoolExecutor for parallel processing
+        with ThreadPoolExecutor(max_workers=min(len(documents), 10)) as executor:
+            # Submit each document extraction task to the thread pool
+            for doc_key, doc_url in documents.items():
+                if isinstance(doc_url, str) and doc_url:
+                    future = executor.submit(
+                        self._extract_document_data_safe,
+                        doc_key,
+                        doc_url
+                    )
+                    futures[future] = doc_key
+        
+        # Collect results as they complete
+        for future in as_completed(futures):
+            doc_key = futures[future]
+            try:
+                result = future.result()
+                processed_docs[doc_key] = result
+            except Exception as e:
+                # Handle any exceptions from threads
+                self.logger.error(f"Error processing document {doc_key}: {str(e)}", exc_info=True)
+                processed_docs[doc_key] = {
+                    "url": documents.get(doc_key, ""),
+                    "document_type": self._get_document_type(doc_key),
+                    "is_valid": False,
+                    "error": str(e)
+                }
+        
+        return processed_docs
+    
+    def _extract_document_data_safe(
+        self, 
+        doc_key: str, 
+        doc_url: str
+    ) -> Dict[str, Any]:
+        """
+        Thread-safe method to extract document data
+        
+        Args:
+            doc_key (str): Document key
+            doc_url (str): Document URL
+        
+        Returns:
+            dict: Document validation result
+        """
+        try:
+            # Get document type
+            doc_type = self._get_document_type(doc_key)
+            
+            # Extract data from document
+            extracted_data = self.extraction_service.extract_document_data(
+                doc_url, 
+                doc_type
+            )
+            
+            # Prepare document validation result
+            return {
+                "url": doc_url,
+                "document_type": doc_type,
+                "is_valid": extracted_data is not None and not (
+                    isinstance(extracted_data, dict) and 
+                    extracted_data.get('extraction_status') == 'failed'
+                ),
+                "extracted_data": extracted_data or {}
+            }
+        
+        except Exception as e:
+            # Handle any exceptions during extraction
+            self.logger.error(f"Document extraction error for {doc_key}: {str(e)}")
+            return {
+                "url": doc_url,
+                "document_type": doc_type,
+                "is_valid": False,
+                "error": str(e)
+            }
 
     def _get_document_type(self, doc_key: str) -> str:
         """
@@ -1343,112 +1421,135 @@ class DocumentValidationService:
             validation_result = {}
             validation_errors = []
             
-            # Validate address proof
-            address_proof_url = company_docs.get('addressProof')
-            
-            if address_proof_url:
-                # Extract document data
-                extracted_data = self.extraction_service.extract_document_data(
-                    address_proof_url, 
-                    'address_proof'
-                )
+            # Use ThreadPoolExecutor for parallel processing of company documents
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                # Submit address proof task
+                address_proof_future = None
+                if 'addressProof' in company_docs:
+                    address_proof_url = company_docs.get('addressProof')
+                    if address_proof_url:
+                        address_proof_future = executor.submit(
+                            self.extraction_service.extract_document_data,
+                            address_proof_url,
+                            'address_proof'
+                        )
                 
-                # Get clarity score
-                clarity_score = 0.0
-                if extracted_data and "clarity_score" in extracted_data:
-                    clarity_score = float(extracted_data.get("clarity_score", 0.0))
+                # Submit NOC task
+                noc_future = None
+                if 'noc' in company_docs:
+                    noc_url = company_docs.get('noc')
+                    if noc_url:
+                        noc_future = executor.submit(
+                            self.extraction_service.extract_document_data,
+                            noc_url,
+                            'noc'
+                        )
                 
-                # Check for complete address
-                complete_address = False
-                if extracted_data:
-                    complete_address = extracted_data.get("complete_address_visible", False)
-                
-                validation_result["addressProof"] = {
-                    "url": address_proof_url,
-                    "is_valid": extracted_data is not None,
-                    "clarity_score": clarity_score,
-                    "complete_address_visible": complete_address,
-                    "extracted_data": extracted_data
-                }
-                
-                # Get company address proof rule
-                company_address_rule = next(
-                    (rule for rule in rules if rule.get('rule_id') == 'COMPANY_ADDRESS_PROOF'), 
-                    None
-                )
-                
-                if company_address_rule:
-                    # Get conditions
-                    conditions = company_address_rule.get('conditions', {})
-                    max_age_days = conditions.get('max_age_days', 45)
+                # Process address proof result
+                if address_proof_future:
+                    try:
+                        address_proof_data = address_proof_future.result()
+                        
+                        # Get clarity score
+                        clarity_score = 0.0
+                        if address_proof_data and "clarity_score" in address_proof_data:
+                            clarity_score = float(address_proof_data.get("clarity_score", 0.0))
+                        
+                        # Check for complete address
+                        complete_address = False
+                        if address_proof_data:
+                            complete_address = address_proof_data.get("complete_address_visible", False)
+                        
+                        validation_result["addressProof"] = {
+                            "url": company_docs.get('addressProof'),
+                            "is_valid": address_proof_data is not None,
+                            "clarity_score": clarity_score,
+                            "complete_address_visible": complete_address,
+                            "extracted_data": address_proof_data
+                        }
+                        
+                        # Validate age if extracted data available
+                        if address_proof_data:
+                            # Get company address proof rule
+                            company_address_rule = next(
+                                (rule for rule in rules if rule.get('rule_id') == 'COMPANY_ADDRESS_PROOF'), 
+                                None
+                            )
+                            
+                            if company_address_rule:
+                                # Get conditions
+                                conditions = company_address_rule.get('conditions', {})
+                                max_age_days = conditions.get('max_age_days', 45)
+                                
+                                # Check address proof age
+                                date_str = address_proof_data.get("date") or address_proof_data.get("bill_date")
+                                if date_str:
+                                    try:
+                                        doc_date = self._parse_date(date_str)
+                                        if doc_date:
+                                            today = datetime.now()
+                                            doc_age = (today - doc_date).days
+                                            # Use max_age_days from rule conditions
+                                            if doc_age > max_age_days:
+                                                validation_errors.append(f"Address proof is {doc_age} days old (exceeds {max_age_days} days limit)")
+                                    except Exception as e:
+                                        self.logger.error(f"Error calculating document age: {e}")
                     
-                    # Check address proof age
-                    if extracted_data:
-                        date_str = extracted_data.get("date") or extracted_data.get("bill_date")
-                        if date_str:
-                            try:
-                                doc_date = self._parse_date(date_str)
-                                if doc_date:
-                                    today = datetime.now()
-                                    doc_age = (today - doc_date).days
-                                    # Use max_age_days from rule conditions
-                                    if doc_age > max_age_days:
-                                        validation_errors.append(f"Address proof is {doc_age} days old (exceeds {max_age_days} days limit)")
-                            except Exception as e:
-                                self.logger.error(f"Error calculating document age: {e}")
-                else:
-                    validation_errors.append("Missing address proof document")
-            
-            # Validate NOC
-            noc_url = company_docs.get('noc')
-            
-            if noc_url:
-                # Extract document data
-                extracted_data = self.extraction_service.extract_document_data(
-                    noc_url, 
-                    'noc'
-                )
+                    except Exception as e:
+                        self.logger.error(f"Error processing address proof: {str(e)}", exc_info=True)
+                        validation_result["addressProof"] = {
+                            "url": company_docs.get('addressProof'),
+                            "is_valid": False,
+                            "error": str(e)
+                        }
+                        validation_errors.append(f"Address proof error: {str(e)}")
                 
-                validation_result["noc"] = {
-                    "url": noc_url,
-                    "is_valid": extracted_data is not None,
-                    "has_signature": extracted_data.get('has_signature', True),  # Be lenient with signature
-                    "extracted_data": extracted_data
-                }
-                
-                # Validate NOC Owner Name if preconditions are provided
-                noc_owner_rule = next(
-                    (rule for rule in rules if rule.get('rule_id') == 'NOC_OWNER_VALIDATION'), 
-                    None
-                )
-                
-                if noc_owner_rule and preconditions and 'owner_name' in preconditions:
-                    expected_owner_name = preconditions.get('owner_name')
-                    actual_owner_name = extracted_data.get('owner_name') if extracted_data else None
+                # Process NOC result
+                if noc_future:
+                    try:
+                        noc_data = noc_future.result()
+                        
+                        validation_result["noc"] = {
+                            "url": company_docs.get('noc'),
+                            "is_valid": noc_data is not None,
+                            "has_signature": noc_data.get('has_signature', True) if noc_data else False,
+                            "extracted_data": noc_data
+                        }
+                        
+                        # Validate NOC Owner Name if preconditions are provided
+                        if noc_data and preconditions and 'owner_name' in preconditions:
+                            noc_owner_rule = next(
+                                (rule for rule in rules if rule.get('rule_id') == 'NOC_OWNER_VALIDATION'), 
+                                None
+                            )
+                            
+                            if noc_owner_rule:
+                                expected_owner_name = preconditions.get('owner_name')
+                                actual_owner_name = noc_data.get('owner_name')
+                                
+                                # Store the validation result for NOC owner
+                                noc_owner_validation = self._validate_noc_owner_name(
+                                    actual_owner_name, 
+                                    expected_owner_name
+                                )
+                                
+                                # Store the validation in result
+                                validation_result["noc_owner_validation"] = noc_owner_validation
+                                
+                                # Add to validation errors if failed
+                                if noc_owner_validation["status"] != "passed":
+                                    validation_errors.append(noc_owner_validation["error_message"])
                     
-                    # Store the validation result for NOC owner
-                    noc_owner_validation = self._validate_noc_owner_name(
-                        actual_owner_name, 
-                        expected_owner_name
-                    )
-                    
-                    # Store the validation in result
-                    validation_result["noc_owner_validation"] = noc_owner_validation
-                    
-                    # Add to validation errors if failed
-                    if noc_owner_validation["status"] != "passed":
-                        validation_errors.append(noc_owner_validation["error_message"])
-            else:
-                # Check if NOC is required in rule conditions
-                noc_rule = next(
-                    (rule for rule in rules if rule.get('rule_id') == 'NOC_VALIDATION'), 
-                    None
-                )
-                
-                if noc_rule and noc_rule.get('conditions', {}).get('noc_required', True):
-                    validation_errors.append("Missing No Objection Certificate (NOC)")
+                    except Exception as e:
+                        self.logger.error(f"Error processing NOC: {str(e)}", exc_info=True)
+                        validation_result["noc"] = {
+                            "url": company_docs.get('noc'),
+                            "is_valid": False,
+                            "error": str(e)
+                        }
+                        validation_errors.append(f"NOC error: {str(e)}")
             
-            # Determine overall validation status
+            # Add validation errors
             if validation_errors:
                 validation_result["validation_errors"] = validation_errors
                 validation_result["is_valid"] = False
@@ -1456,7 +1557,7 @@ class DocumentValidationService:
                 validation_result["is_valid"] = True
             
             return validation_result
-            
+                
         except Exception as e:
             self.logger.error(f"Company document validation error: {str(e)}", exc_info=True)
             return {
