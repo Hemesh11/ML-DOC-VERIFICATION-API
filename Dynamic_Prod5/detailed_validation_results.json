@@ -62,10 +62,10 @@
         "name_match_required": true
       },
       "status": "failed",
-      "error_message": "Address proof for director1 is 84 days old (exceeds 45 days limit)",
+      "error_message": "Address proof for director_2 is 96 days old (exceeds 45 days limit)",
       "details": {
         "status": "failed",
-        "error_message": "Address proof for director1 is 84 days old (exceeds 45 days limit)"
+        "error_message": "Address proof for director_2 is 96 days old (exceeds 45 days limit)"
       }
     },
     "indian_director_pan": {
@@ -162,152 +162,37 @@
         "linkage_api_check_required": true
       },
       "status": "failed",
-      "error_message": "Aadhar and PAN not linked for director1: API rate limit or temporary error",
+      "error_message": "Aadhar and PAN not linked for director_1: Unexpected error during verification",
       "details": {
         "status": "failed",
-        "error_message": "Aadhar and PAN not linked for director1: API rate limit or temporary error"
-      }
-    },
-    "noc_owner_validation": {
-      "rule_id": "NOC_OWNER_VALIDATION",
-      "rule_name": "NOC Owner Name Validation",
-      "description": "Verify NOC owner name matches API returned owner name",
-      "severity": "high",
-      "is_active": true,
-      "conditions": {
-        "api_check_required": true
-      },
-      "status": "failed",
-      "error_message": "NOC owner name 'DINAKARAN V' does not match expected name 'Parth'",
-      "details": {
-        "status": "failed",
-        "error_message": "NOC owner name 'DINAKARAN V' does not match expected name 'Parth'"
+        "error_message": "Aadhar and PAN not linked for director_1: Unexpected error during verification"
       }
     }
   },
   "document_validation": {
     "directors": {
-      "director1": {
-        "nationality": "Indian",
+      "director_2": {
+        "nationality": "Foreign",
         "is_authorised": true,
         "is_valid": false,
         "validation_errors": [
-          "Aadhar and PAN not linked for director1: API rate limit or temporary error",
-          "Address proof for director1 is 84 days old (exceeds 45 days limit)"
+          "Address proof for director_2 is 96 days old (exceeds 45 days limit)"
         ],
         "documents": {
-          "aadharCardFront": {
-            "url": "https://drive.google.com/file/d/13VuASJkX9SFFTiRWYaJXP68PqEweQgNH/view?usp=sharing",
-            "is_valid": true,
-            "extracted_data": {
-              "name": "Vivek Kumar",
-              "dob": "15/04/1980",
-              "gender": "M",
-              "aadhar_number": "8039 1188 6850",
-              "address": "C/O: Jilaajeet Ram, 410, 4th Floor, Tower - Latina, Mahagun Mirabella, Sector - 79, Noida, Gautam Buddha Nagar, Uttar Pradesh - 201301",
-              "is_masked": false,
-              "clarity_score": 0.95
-            },
-            "document_type": "aadhar_front"
-          },
-          "aadharCardBack": {
-            "url": "https://drive.google.com/file/d/13VuASJkX9SFFTiRWYaJXP68PqEweQgNH/view?usp=sharing",
-            "is_valid": true,
-            "extracted_data": {
-              "name": "Vivek Kumar",
-              "dob": "15/04/1980",
-              "gender": "M",
-              "aadhar_number": "8039 1188 6850",
-              "address": "C/O: Jilaajeet Ram, 410, 4th Floor, Tower - Latina, Mahagun Mirabella, Sector - 79, Noida, Gautam Buddha Nagar, Uttar Pradesh - 201301",
-              "is_masked": false,
-              "clarity_score": 0.95
-            },
-            "document_type": "aadhar_back"
-          },
-          "panCard": {
-            "url": "https://drive.google.com/file/d/1OvxgK1Ndelcih0AMiGWBuZoxW6MawD5M/view?usp=sharing",
-            "is_valid": true,
-            "extracted_data": {
-              "name": "VIVEK KUMAR",
-              "father_name": "JILAJEET RAM",
-              "dob": "15/04/1980",
-              "pan_number": "ARRPK1877D",
-              "clarity_score": 0.9
-            },
-            "document_type": "pan"
-          },
-          "passportPhoto": {
-            "url": "https://drive.google.com/file/d/15ePWxHU016AcKCexKflH--I7zMCxQsMA/view?usp=sharing",
-            "is_valid": true,
-            "extracted_data": {
-              "clarity_score": 0.95,
-              "is_recent": false,
-              "is_passport_style": true,
-              "face_visible": true
-            },
-            "document_type": "passport_photo"
-          },
-          "address_proof": {
-            "url": "https://drive.google.com/file/d/1S1bonPYt8cs9JwvJFeetNjRCnhHeE09e/view?usp=sharing",
-            "is_valid": true,
-            "extracted_data": {
-              "name": "A KRISHNAN KAVIRAKKARAI",
-              "address": "KONAYAKKARAI, KUNRAKARAI, COONOOR. TAMIL NADU.",
-              "document_type": "Tax Invoice",
-              "date": "23/01/2025",
-              "issuing_authority": "TAMILNADU GENERATION AND DISTRIBUTION CORPORATION LIMITED",
-              "clarity_score": 0.95,
-              "complete_address_visible": true
-            },
-            "document_type": "address_proof"
-          },
           "signature": {
-            "url": "https://drive.google.com/file/d/1wDAY45fd6bVmPs0AbejzVxFR42uAxS1-/view?usp=sharing",
+            "url": "https://drive.google.com/file/d/1iOig2z_PDHkKFMU4m0_sLZngrmjHYrAD/view?usp=sharing",
+            "document_type": "signature",
             "is_valid": false,
             "extracted_data": {
               "extraction_status": "failed",
               "document_type": "signature",
               "error_message": "Verification failed",
               "clarity_score": 0.0
-            },
-            "document_type": "signature"
-          }
-        },
-        "rule_validations": {
-          "indian_director_pan": {
-            "status": "passed",
-            "error_message": null
+            }
           },
-          "indian_director_aadhar": {
-            "status": "passed",
-            "error_message": null
-          },
-          "aadhar_pan_linkage": {
-            "status": "failed",
-            "error_message": "Aadhar and PAN not linked for director1: API rate limit or temporary error"
-          },
-          "passport_photo": {
-            "status": "passed",
-            "error_message": null
-          },
-          "signature": {
-            "status": "passed",
-            "error_message": null
-          },
-          "address_proof": {
-            "status": "failed",
-            "error_message": "Address proof for director1 is 84 days old (exceeds 45 days limit)"
-          }
-        }
-      },
-      "director2": {
-        "nationality": "Foreign",
-        "is_authorised": true,
-        "is_valid": true,
-        "validation_errors": [],
-        "documents": {
           "panCard": {
             "url": "https://drive.google.com/file/d/1l5bun1D9ISYqAYImj2VAwaoOlRPWv9pS/view?usp=sharing",
+            "document_type": "pan",
             "is_valid": true,
             "extracted_data": {
               "name": "A KRISHNAN",
@@ -315,22 +200,11 @@
               "dob": "27/05/1954",
               "pan_number": "AXFPK5736K",
               "clarity_score": 0.9
-            },
-            "document_type": "pan"
-          },
-          "passportPhoto": {
-            "url": "https://drive.google.com/file/d/1Y85m-9233Mx6pq-y-FObD2cQc6AmO2Om/view?usp=sharing",
-            "is_valid": false,
-            "extracted_data": {
-              "extraction_status": "failed",
-              "document_type": "passport_photo",
-              "error_message": "Verification failed",
-              "clarity_score": 0.0
-            },
-            "document_type": "passport_photo"
+            }
           },
           "address_proof": {
             "url": "https://drive.google.com/file/d/1pMokK6ZhlYFbydFsRJJgHi7Szy9k9FxD/view?usp=sharing",
+            "document_type": "address_proof",
             "is_valid": true,
             "extracted_data": {
               "name": "KRISHNAN A",
@@ -340,19 +214,18 @@
               "issuing_authority": "CANARA BANK",
               "clarity_score": 0.95,
               "complete_address_visible": true
-            },
-            "document_type": "address_proof"
+            }
           },
-          "signature": {
-            "url": "https://drive.google.com/file/d/1iOig2z_PDHkKFMU4m0_sLZngrmjHYrAD/view?usp=sharing",
+          "passportPhoto": {
+            "url": "https://drive.google.com/file/d/1Y85m-9233Mx6pq-y-FObD2cQc6AmO2Om/view?usp=sharing",
+            "document_type": "passport_photo",
             "is_valid": false,
             "extracted_data": {
               "extraction_status": "failed",
-              "document_type": "signature",
+              "document_type": "passport_photo",
               "error_message": "Verification failed",
               "clarity_score": 0.0
-            },
-            "document_type": "signature"
+            }
           }
         },
         "rule_validations": {
@@ -369,8 +242,234 @@
             "error_message": null
           },
           "address_proof": {
+            "status": "failed",
+            "error_message": "Address proof for director_2 is 96 days old (exceeds 45 days limit)"
+          }
+        }
+      },
+      "director_1": {
+        "nationality": "Indian",
+        "is_authorised": true,
+        "is_valid": false,
+        "validation_errors": [
+          "Aadhar and PAN not linked for director_1: Unexpected error during verification",
+          "Address proof for director_1 is 138 days old (exceeds 45 days limit)"
+        ],
+        "documents": {
+          "signature": {
+            "url": "https://drive.google.com/file/d/1wDAY45fd6bVmPs0AbejzVxFR42uAxS1-/view?usp=sharing",
+            "document_type": "signature",
+            "is_valid": false,
+            "extracted_data": {
+              "extraction_status": "failed",
+              "document_type": "signature",
+              "error_message": "Verification failed",
+              "clarity_score": 0.0
+            }
+          },
+          "address_proof": {
+            "url": "https://drive.google.com/file/d/1S1bonPYt8cs9JwvJFeetNjRCnhHeE09e/view?usp=sharing",
+            "document_type": "address_proof",
+            "is_valid": true,
+            "extracted_data": {
+              "name": "A KRISHNAN",
+              "address": "KONAYAKKARAI, KULONKARAKKAL, COONOOR, TAMIL NADU",
+              "document_type": "Tax Invoice for LT Current Consumption Charges",
+              "date": "23/01/2025",
+              "issuing_authority": "TAMILNADU GENERATION AND DISTRIBUTION CORPORATION LIMITED",
+              "clarity_score": 1,
+              "complete_address_visible": true
+            }
+          },
+          "panCard": {
+            "url": "https://drive.google.com/file/d/1OvxgK1Ndelcih0AMiGWBuZoxW6MawD5M/view?usp=sharing",
+            "document_type": "pan",
+            "is_valid": true,
+            "extracted_data": {
+              "name": "VIVEK KUMAR",
+              "father_name": "JILAJEET RAM",
+              "dob": "15/04/1980",
+              "pan_number": "ARRPK1877D",
+              "clarity_score": 0.9
+            }
+          },
+          "passportPhoto": {
+            "url": "https://drive.google.com/file/d/15ePWxHU016AcKCexKflH--I7zMCxQsMA/view?usp=sharing",
+            "document_type": "passport_photo",
+            "is_valid": false,
+            "extracted_data": {
+              "extraction_status": "failed",
+              "document_type": "passport_photo",
+              "error_message": "Verification failed",
+              "clarity_score": 0.0
+            }
+          },
+          "aadharCardFront": {
+            "url": "https://drive.google.com/file/d/13VuASJkX9SFFTiRWYaJXP68PqEweQgNH/view?usp=sharing",
+            "document_type": "aadhar_front",
+            "is_valid": true,
+            "extracted_data": {
+              "name": "Vivek Kumar",
+              "dob": "15/04/1980",
+              "gender": "M",
+              "aadhar_number": "8039 1188 6850",
+              "address": "C/O: Jilaajeet Ram, 410, 4th Floor, Tower - Latina, Mahagun Mirabella, Sector - 79, Noida, Gautam Buddha Nagar, Uttar Pradesh - 201301",
+              "is_masked": false,
+              "clarity_score": 1.0
+            }
+          },
+          "aadharCardBack": {
+            "url": "https://drive.google.com/file/d/13VuASJkX9SFFTiRWYaJXP68PqEweQgNH/view?usp=sharing",
+            "document_type": "aadhar_back",
+            "is_valid": true,
+            "extracted_data": {
+              "name": "Vivek Kumar",
+              "dob": "15/04/1980",
+              "gender": "M",
+              "aadhar_number": "8039 1188 6850",
+              "address": "C/O: Jilaajeet Ram, 410, 4th Floor, Tower - Latina, Mahagun Mirabella, Sector - 79, Noida, Gautam Buddha Nagar, Uttar Pradesh - 201301",
+              "is_masked": false,
+              "clarity_score": 1.0
+            }
+          }
+        },
+        "rule_validations": {
+          "indian_director_pan": {
             "status": "passed",
             "error_message": null
+          },
+          "indian_director_aadhar": {
+            "status": "passed",
+            "error_message": null
+          },
+          "aadhar_pan_linkage": {
+            "status": "failed",
+            "error_message": "Aadhar and PAN not linked for director_1: Unexpected error during verification"
+          },
+          "passport_photo": {
+            "status": "passed",
+            "error_message": null
+          },
+          "signature": {
+            "status": "passed",
+            "error_message": null
+          },
+          "address_proof": {
+            "status": "failed",
+            "error_message": "Address proof for director_1 is 138 days old (exceeds 45 days limit)"
+          }
+        }
+      },
+      "director_3": {
+        "nationality": "Indian",
+        "is_authorised": true,
+        "is_valid": false,
+        "validation_errors": [
+          "Aadhar and PAN not linked for director_3: Unexpected error during verification",
+          "Address proof for director_3 is 486 days old (exceeds 45 days limit)"
+        ],
+        "documents": {
+          "aadharCardFront": {
+            "url": "https://drive.google.com/file/d/1Bu4OAIBunwj2GT9tjnOtH00yu8EIoywE/view?usp=sharing",
+            "document_type": "aadhar_front",
+            "is_valid": true,
+            "extracted_data": {
+              "name": "Dinakaran V",
+              "dob": "24/04/1973",
+              "gender": "M",
+              "aadhar_number": "6342 1453 2240",
+              "address": null,
+              "is_masked": false,
+              "clarity_score": 0.9
+            }
+          },
+          "panCard": {
+            "url": "https://drive.google.com/file/d/1CC7aWWG-RCDT-z1VWohlEEsHWND22LWQ/view?usp=sharing",
+            "document_type": "pan",
+            "is_valid": true,
+            "extracted_data": {
+              "name": "DINAKARAN V",
+              "father_name": "PACHIYAPPANNAICKER VISWANATHAN",
+              "dob": "24/04/1973",
+              "pan_number": "AHKPD5293M",
+              "clarity_score": 0.95
+            }
+          },
+          "aadharCardBack": {
+            "url": "https://drive.google.com/file/d/1MgKSiyNhdYcSFBO1IhLBnV_o7QmR_UiL/view?usp=sharing",
+            "document_type": "aadhar_back",
+            "is_valid": true,
+            "extracted_data": {
+              "name": "Vishwanathan",
+              "dob": null,
+              "gender": null,
+              "aadhar_number": "6342 1453 2240",
+              "address": "SO: Vishwanathan, 7/290, 1st CROSS STREET, 7th BLOCK, MUGAPPAIR WEST, Mogappair, Tiruvallur, Tamil Nadu - 60037",
+              "is_masked": false,
+              "clarity_score": 0.85
+            }
+          },
+          "signature": {
+            "url": "https://drive.google.com/file/d/1RXn40z-xONfuxg2Jic0IZ7fvVXvTKdSV/view?usp=sharing",
+            "document_type": "signature",
+            "is_valid": false,
+            "extracted_data": {
+              "extraction_status": "failed",
+              "document_type": "signature",
+              "error_message": "Verification failed",
+              "clarity_score": 0.0
+            }
+          },
+          "address_proof": {
+            "url": "https://drive.google.com/file/d/1NFi-kr6Zenp2kwdYRQ4rRlc7uO8fo0tv/view?usp=sharing",
+            "document_type": "address_proof",
+            "is_valid": true,
+            "extracted_data": {
+              "name": "V. D. KANAGARAJ",
+              "address": "FIFTH B LOCK, M.P.R. WEST, CHENNAI",
+              "document_type": "Tax Invoice",
+              "date": "10/02/2024",
+              "issuing_authority": "TAMILNADU GENERATION AND DISTRIBUTION CORPORATION LIMITED",
+              "clarity_score": 0.95,
+              "complete_address_visible": true
+            }
+          },
+          "passportPhoto": {
+            "url": "https://drive.google.com/file/d/15ePWxHU016AcKCexKflH--I7zMCxQsMA/view?usp=sharing",
+            "document_type": "passport_photo",
+            "is_valid": false,
+            "extracted_data": {
+              "extraction_status": "failed",
+              "document_type": "passport_photo",
+              "error_message": "Verification failed",
+              "clarity_score": 0.0
+            }
+          }
+        },
+        "rule_validations": {
+          "indian_director_pan": {
+            "status": "passed",
+            "error_message": null
+          },
+          "indian_director_aadhar": {
+            "status": "passed",
+            "error_message": null
+          },
+          "aadhar_pan_linkage": {
+            "status": "failed",
+            "error_message": "Aadhar and PAN not linked for director_3: Unexpected error during verification"
+          },
+          "passport_photo": {
+            "status": "passed",
+            "error_message": null
+          },
+          "signature": {
+            "status": "passed",
+            "error_message": null
+          },
+          "address_proof": {
+            "status": "failed",
+            "error_message": "Address proof for director_3 is 486 days old (exceeds 45 days limit)"
           }
         }
       },
@@ -378,6 +477,22 @@
         "director_count": {
           "status": "passed",
           "error_message": null
+        },
+        "foreign_director_docs": {
+          "status": "passed",
+          "error_message": null
+        },
+        "passport_photo": {
+          "status": "passed",
+          "error_message": null
+        },
+        "signature": {
+          "status": "passed",
+          "error_message": null
+        },
+        "address_proof": {
+          "status": "failed",
+          "error_message": "Address proof for director_3 is 486 days old (exceeds 45 days limit)"
         },
         "indian_director_pan": {
           "status": "passed",
@@ -389,73 +504,42 @@
         },
         "aadhar_pan_linkage": {
           "status": "failed",
-          "error_message": "Aadhar and PAN not linked for director1: API rate limit or temporary error"
-        },
-        "passport_photo": {
-          "status": "passed",
-          "error_message": null
-        },
-        "signature": {
-          "status": "passed",
-          "error_message": null
-        },
-        "address_proof": {
-          "status": "passed",
-          "error_message": null
-        },
-        "foreign_director_docs": {
-          "status": "passed",
-          "error_message": null
+          "error_message": "Aadhar and PAN not linked for director_3: Unexpected error during verification"
         }
       }
     },
     "companyDocuments": {
       "addressProof": {
-        "url": "https://drive.google.com/file/d/1S1bonPYt8cs9JwvJFeetNjRCnhHeE09e/view?usp=sharing",
+        "url": "https://drive.google.com/file/d/1iOig2z_PDHkKFMU4m0_sLZngrmjHYrAD/view?usp=sharing",
         "is_valid": true,
-        "clarity_score": 0.95,
-        "complete_address_visible": true,
+        "clarity_score": 0.0,
+        "complete_address_visible": false,
         "extracted_data": {
-          "name": "A KRISHNAN KAVIRAJAGAR",
-          "address": "KONAYAKKARAI, KUNNATHKULANGARA, CONOOR, TAMIL NADU",
-          "document_type": "Tax Invoice for LT Current Consumption Charges",
-          "date": "23/01/2025",
-          "issuing_authority": "TAMIL NADU GENERATION AND DISTRIBUTION CORPORATION LIMITED",
-          "clarity_score": 0.95,
-          "complete_address_visible": true
+          "extraction_status": "failed",
+          "document_type": "address_proof",
+          "error_message": "Verification failed",
+          "clarity_score": 0.0
         }
       },
       "noc": {
-        "url": "https://drive.google.com/file/d/1rkGAKSnsLNfUlDudwj25B9nQSQTntzPe/view?usp=sharing",
+        "url": "https://drive.google.com/file/d/1iOig2z_PDHkKFMU4m0_sLZngrmjHYrAD/view?usp=sharing",
         "is_valid": true,
         "has_signature": true,
         "extracted_data": {
-          "owner_name": "DINAKARAN V",
-          "property_address": "5315, Thiruvallur, 2nd Street, Jj Nagar West, Tamil Nadu, 600037",
-          "applicant_name": "VISHABHAIRAVI BHARAT REALTYS Private Limited",
-          "date": "01/04/2025",
-          "purpose": "Using the property address as the Registered office address",
-          "has_signature": true,
-          "clarity_score": 0.9,
-          "is_valid_noc": true
+          "extraction_status": "failed",
+          "document_type": "noc",
+          "error_message": "Verification failed",
+          "clarity_score": 0.0
         }
       },
-      "noc_owner_validation": {
-        "status": "failed",
-        "error_message": "NOC owner name 'DINAKARAN V' does not match expected name 'Parth'"
-      },
-      "validation_errors": [
-        "Address proof is 84 days old (exceeds 45 days limit)",
-        "NOC owner name 'DINAKARAN V' does not match expected name 'Parth'"
-      ],
-      "is_valid": false
+      "is_valid": true
     }
   },
   "metadata": {
-    "service_id": "3",
-    "request_id": "REQ_12345",
-    "timestamp": "2025-04-17T03:04:20.153890",
-    "processing_time": 116.41902613639832,
+    "service_id": "1",
+    "request_id": "req-12345",
+    "timestamp": "2025-06-10T14:23:34.053275",
+    "processing_time": 46.969945669174194,
     "is_compliant": false
   }
 }

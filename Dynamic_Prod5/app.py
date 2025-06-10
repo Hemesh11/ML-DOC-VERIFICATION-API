@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import logging
 import json
+import os
 from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
 from elasticapm.contrib.starlette import make_apm_client, ElasticAPM
